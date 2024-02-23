@@ -1,28 +1,37 @@
 const express = require("express");
-const EventEmitter = require("events");
+const mongoose = require("mongoose");
 
-const event = new EventEmitter;
+mongoose.connect("mongodb://localhost:27017/todoapp")
+const task = require("./schema.js");
+
 const app = express();
+app.use(express.json());
 
-let count =0;
-event.on("apiCall",()=>{
-count ++;
-console.log("API call : "+count);
+app.get("/",async(req,res)=>{
+  const data = await task.find();
+  res.send(data);
 })
 
-app.get("/",(req,res)=>{
-  console.log("api called");
-  event.emit("apiCall");
+app.post("/add",async (req,res)=>{
+  const data = new task(req.body)
+  const result = await data.save();
+  res.send(result);
+})          
+//{         Body from Postman
+ // "task": "Your Task",
+ // "status": "Your Status",
+ // "date": "2024-02-24"
+//}
+
+app.put("/update/:status",async(req,res)=>{
+  const data = await task.updateMany(req.params,{$set:req.body})
+  res.send(data);
 })
 
-app.get("/update",(req,res)=>{
-  console.log("update api called");
-  event.emit("apiCall");
+app.delete("/delete/:_id",async(req,res)=>{
+  const data = await task.deleteMany(req.params); 
+  res.send(data);
 })
 
-app.get("/search",(req,res)=>{
-  console.log("search api called");
-  event.emit("apiCall");
-})
 
 app.listen(5000);
