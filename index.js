@@ -1,26 +1,28 @@
 const express = require("express");
-const multer = require("multer");
+const EventEmitter = require("events");
 
+const event = new EventEmitter;
 const app = express();
 
-// const upload = multer({
-//   storage: multer.diskStorage({
-//     destination: function (req, file, cb) {
-//       cb(null, "uploads");
-//     },
-//     filename: function (req, file, cb) {
-//       cb(null, file.fieldname + "-PostMan.jpg");
-//     },
-//   }),
-// });
+let count =0;
+event.on("apiCall",()=>{
+count ++;
+console.log("API call : "+count);
+})
 
-// app.post("/stats", upload.single("uploaded_file"), (req, res)=>{
-//   res.status(200).send("File uploaded successfully!");
-// });
+app.get("/",(req,res)=>{
+  console.log("api called");
+  event.emit("apiCall");
+})
 
-const upload = multer({ dest: 'uploads'})   //if do not want to change filename
-app.post('/stats', upload.single('uploaded_file'), function (req, res) {
-   res.send("Uploaded");
-});
+app.get("/update",(req,res)=>{
+  console.log("update api called");
+  event.emit("apiCall");
+})
+
+app.get("/search",(req,res)=>{
+  console.log("search api called");
+  event.emit("apiCall");
+})
 
 app.listen(5000);
